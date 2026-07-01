@@ -1,8 +1,12 @@
 # Mohavise FortiGate Adblock
 
-This project builds a clean FortiGate-friendly adblock domain feed every day from upstream block sources.
+This project builds FortiGate-friendly outputs from the shared Mohavise adblock core list.
 
-The first source is HaGeZi `light.txt`, a conservative starting point. After testing, you can change `config/sources.txt` to HaGeZi `multi.txt` or `pro.txt` for stronger blocking.
+Source and allowlist changes are managed in the core repo:
+
+```text
+https://github.com/mohavise/mohavise-adblock-core
+```
 
 ## Daily Timing
 
@@ -43,10 +47,7 @@ After adding the external resource, attach it to the FortiGate DNS filter or sec
 | --- | --- |
 | `fortigate-domains.txt` | Final generated FortiGate domain feed |
 | `fortigate-hosts.txt` | Optional hosts-format output |
-| `config/sources.txt` | Upstream blocklist URLs |
-| `config/allowlist-core.txt` | Domains that must not be blocked |
-| `config/blocklist-custom.txt` | Your own blocked domains |
-| `scripts/build-fortigate-adblock.ps1` | Builds the final FortiGate files |
+| `scripts/build-fortigate-adblock.ps1` | Downloads the core list and builds the final FortiGate files |
 
 ## Marker
 
