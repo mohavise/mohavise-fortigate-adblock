@@ -1,7 +1,6 @@
 param(
     [string]$CoreUrl = "https://raw.githubusercontent.com/mohavise/mohavise-adblock-core/main/core-domains.txt",
-    [string]$DomainOutputFile = "..\fortigate-domains.txt",
-    [string]$HostOutputFile = "..\fortigate-hosts.txt"
+    [string]$DomainOutputFile = "..\fortigate-domains.txt"
 )
 
 $ErrorActionPreference = "Stop"
@@ -25,10 +24,6 @@ $final = $coreLines |
 $domainLines = [System.Collections.Generic.List[string]]::new()
 $final | ForEach-Object { [void]$domainLines.Add($_) }
 
-$hostLines = [System.Collections.Generic.List[string]]::new()
-$final | ForEach-Object { [void]$hostLines.Add("0.0.0.0 $_") }
-
 Set-Content -LiteralPath $DomainOutputFile -Value $domainLines -Encoding ASCII
-Set-Content -LiteralPath $HostOutputFile -Value $hostLines -Encoding ASCII
 
-Write-Host "Generated $DomainOutputFile and $HostOutputFile with $($final.Count) blocked domains."
+Write-Host "Generated $DomainOutputFile with $($final.Count) blocked domains."
