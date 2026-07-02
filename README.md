@@ -46,7 +46,13 @@ After adding the external resource, attach it to the FortiGate DNS filter or sec
 | File | Purpose |
 | --- | --- |
 | `fortigate-domains.txt` | Final generated FortiGate domain feed |
-| `scripts/build-fortigate-adblock.ps1` | Downloads the core list and builds the final FortiGate files |
+| `scripts/build-fortigate-adblock.sh` | Downloads the core list and builds the final FortiGate files |
+
+## Build
+
+```bash
+./scripts/build-fortigate-adblock.sh
+```
 
 ## Marker
 
