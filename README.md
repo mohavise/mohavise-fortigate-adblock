@@ -2,7 +2,7 @@
 
 This repository is the FortiGate child/output repo of the main Mohavise adblock core project.
 
-It builds a FortiGate-friendly external domain threat feed from the shared core domain list.
+It builds FortiGate-friendly external domain threat feeds from the validated parent core lists.
 Source lists, upstream changes, custom blocks, allowlists, and data validation are managed in the parent core repo:
 
 ```text
@@ -23,57 +23,111 @@ FortiGate external domain threat feed
 
 GitHub Actions runs at `00:00 UTC`, which is `03:30 Asia/Tehran`.
 
-## Materials / Output Files
+FortiGate refreshes the external resource based on the configured `refresh-rate`.
 
-This repo has one final FortiGate material:
+## Output Strategy
+
+This repo now supports separate endpoint lists.
+
+```text
+adblock list = ads / trackers
+adult list   = adult / NSFW domains
+combined     = adblock + adult together
+```
+
+For normal production use, create two separate FortiGate external resources:
+
+```text
+fortigate-adblock-domains.txt
+fortigate-adult-domains.txt
+```
+
+This is better than only one combined feed because you can apply, disable, log, or troubleshoot adblock and adult blocking separately.
+
+## Materials / Output Files
 
 | File | Format | Main Use |
 | --- | --- | --- |
-| `fortigate-domains.txt` | Plain domain list with no header comments | Main file used as a FortiGate external domain threat feed |
+| `fortigate-adblock-domains.txt` | Plain domain list with no header comments | FortiGate external domain feed for ads / trackers |
+| `fortigate-adult-domains.txt` | Plain domain list with no header comments | FortiGate external domain feed for adult / NSFW domains |
+| `fortigate-domains.txt` | Plain domain list with no header comments | Compatibility combined feed for old/simple installs |
 
-The parent repo is responsible for cleaning and validating the data before this repo builds the FortiGate output.
+Simple explanation:
+
+```text
+fortigate-adblock-domains.txt = main adblock external feed
+fortigate-adult-domains.txt   = main adult external feed
+fortigate-domains.txt         = old combined compatibility feed
+```
 
 ## Use In FortiGate
 
-Use this raw URL as an external domain threat feed:
+Use these raw URLs as external domain threat feeds:
 
 ```text
-https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-domains.txt
+https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-adblock-domains.txt
+https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-adult-domains.txt
 ```
 
-The generated file is a plain domain list with no header comments:
+The generated files are plain domain lists with no header comments:
 
 ```text
 example-ad-domain.com
 tracker.example.net
 ```
 
-## Example External Resource
+## Example External Resources
 
 ```fortios
 config system external-resource
     edit "mohavise-adblock-domains"
         set type domain
-        set resource "https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-domains.txt"
+        set resource "https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-adblock-domains.txt"
+        set refresh-rate 1440
+    next
+    edit "mohavise-adult-domains"
+        set type domain
+        set resource "https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-adult-domains.txt"
         set refresh-rate 1440
     next
 end
 ```
 
-After adding the external resource, attach it to the FortiGate DNS filter or security profile path appropriate for your FortiOS version.
+After adding the external resources, attach them to the FortiGate DNS filter or security profile path appropriate for your FortiOS version.
+
+## Optional Combined URL
+
+Use this only if you want one simple combined feed instead of two separate feeds:
+
+```text
+https://raw.githubusercontent.com/mohavise/mohavise-fortigate-adblock/main/fortigate-domains.txt
+```
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `fortigate-domains.txt` | Final generated FortiGate domain feed |
-| `scripts/build-fortigate-adblock.sh` | Downloads the core list and builds the final FortiGate file |
+| `fortigate-adblock-domains.txt` | Final generated FortiGate adblock category feed |
+| `fortigate-adult-domains.txt` | Final generated FortiGate adult category feed |
+| `fortigate-domains.txt` | Final generated combined compatibility feed |
+| `scripts/build-fortigate-adblock.sh` | Downloads category core lists and builds FortiGate outputs |
+| `.github/workflows/update-fortigate-adblock.yml` | Daily GitHub Actions build workflow |
 
 ## Build
 
 ```bash
 ./scripts/build-fortigate-adblock.sh
 ```
+
+The build script reads:
+
+```text
+core-domains.txt
+core-adblock-domains.txt
+core-adult-domains.txt
+```
+
+and generates FortiGate-ready combined, adblock-only, and adult-only outputs.
 
 ## Signature
 
@@ -89,8 +143,8 @@ The signature makes future updates safer because generated outputs can be clearl
 ## Update-Ready Approach
 
 ```text
-Parent/core repo validates and publishes the canonical list.
-Child repo converts the canonical list into a FortiGate-ready output.
+Parent/core repo validates and publishes category lists.
+Child repo converts category lists into FortiGate-ready outputs.
 FortiGate refreshes the final output through the external resource schedule.
 Managed items are marked with a clear signature.
 Future changes should update managed outputs only, not unrelated user configuration.
@@ -99,20 +153,21 @@ Future changes should update managed outputs only, not unrelated user configurat
 ## Future Vision
 
 ```text
-One clean parent list.
-Multiple child outputs.
-Same structure.
+One clean parent system.
+Separate category outputs.
+Multiple child platform outputs.
 Same timing.
 Same signature style.
 Safe daily updates.
-Easy rollback and future platform expansion.
+Easy rollback and future category expansion.
 ```
 
-Planned child/output targets can include MikroTik, Pi-hole, FortiGate, and other DNS/security platforms that can consume domain feeds.
+Planned future categories can include malware, gambling, social media, crypto, telemetry, and other DNS/security feeds.
 
 ## Logic
 
 ```text
-mohavise-adblock-core/core-domains.txt = validated canonical source
-mohavise-fortigate-adblock/fortigate-domains.txt = FortiGate-ready output
+core-adblock-domains.txt → fortigate-adblock-domains.txt
+core-adult-domains.txt   → fortigate-adult-domains.txt
+core-domains.txt         → fortigate-domains.txt
 ```
