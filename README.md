@@ -75,13 +75,40 @@ After adding the external resource, attach it to the FortiGate DNS filter or sec
 ./scripts/build-fortigate-adblock.sh
 ```
 
-## Marker
+## Signature
 
-Generated files use this marker:
+Generated items use this signature:
 
 ```text
 managed-by=mohavise-fortigate-adblock
+project=mohavise-fortigate-adblock
 ```
+
+The signature makes future updates safer because generated outputs can be clearly identified as managed by this project.
+
+## Update-Ready Approach
+
+```text
+Parent/core repo validates and publishes the canonical list.
+Child repo converts the canonical list into a FortiGate-ready output.
+FortiGate refreshes the final output through the external resource schedule.
+Managed items are marked with a clear signature.
+Future changes should update managed outputs only, not unrelated user configuration.
+```
+
+## Future Vision
+
+```text
+One clean parent list.
+Multiple child outputs.
+Same structure.
+Same timing.
+Same signature style.
+Safe daily updates.
+Easy rollback and future platform expansion.
+```
+
+Planned child/output targets can include MikroTik, Pi-hole, FortiGate, and other DNS/security platforms that can consume domain feeds.
 
 ## Logic
 
