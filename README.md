@@ -171,3 +171,9 @@ core-adblock-domains.txt → fortigate-adblock-domains.txt
 core-adult-domains.txt   → fortigate-adult-domains.txt
 core-domains.txt         → fortigate-domains.txt
 ```
+
+## Cleanup Policy
+
+Before removing any file from this repository, read `CLEANUP_POLICY.md`.
+
+Generated outputs, compatibility files, FortiGate feed endpoints, workflows, and scripts are intentional parts of the process. Do not delete them only because they look duplicated, old, large, or generated.
