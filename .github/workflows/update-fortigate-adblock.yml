@@ -9,25 +9,35 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: update-fortigate-adblock
+  cancel-in-progress: false
+
 jobs:
   update-adblock:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build FortiGate adblock feed
+      - name: Build and validate FortiGate feeds
         run: bash ./scripts/build-fortigate-adblock.sh
 
-      - name: Commit updated feed
+      - name: Commit updated feeds
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add fortigate-domains.txt fortigate-adblock-domains.txt fortigate-adult-domains.txt
+
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "Update FortiGate adblock feed"
-          git push
+
+          git commit -m "Update FortiGate adblock feeds"
+          git pull --rebase origin main
+          git push origin HEAD:main
